@@ -54,4 +54,10 @@ describe('GetBalanceUseCase', () => {
 
     await expect(promise).rejects.toBeInstanceOf(GetStatementOperationError.StatementNotFound)
   })
+
+  it('should return correct data on success', async () => {
+    const statement = await sut.execute({user_id: 'any_user_id', statement_id: 'statement_id'})
+
+    expect(statement).toEqual(makeFakeStatement())
+  })
 })
