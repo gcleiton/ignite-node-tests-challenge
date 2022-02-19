@@ -15,6 +15,17 @@ const makeFakeUser = () => {
   }
 }
 
+const makeFakeStatement = () => {
+  return {
+    id: 'any_id',
+    user_id: 'any_user_id',
+    user: 'any_user',
+    description: 'any_description',
+    amount: 'any_amount',
+    type: 'any_type'
+  }
+}
+
 describe('GetBalanceUseCase', () => {
   let statementRepository: IStatementsRepository
   let userRepository: IUsersRepository
@@ -22,6 +33,7 @@ describe('GetBalanceUseCase', () => {
 
   beforeEach(() => {
     statementRepository = new InMemoryStatementsRepository()
+    statementRepository.findStatementOperation = jest.fn().mockResolvedValue(makeFakeStatement())
     userRepository = new InMemoryUsersRepository()
     userRepository.findById = jest.fn().mockResolvedValue(makeFakeUser())
     sut = new GetStatementOperationUseCase(userRepository, statementRepository)
@@ -33,5 +45,13 @@ describe('GetBalanceUseCase', () => {
     const promise = sut.execute({user_id: 'invalid_user_id', statement_id: 'any_statement_id'})
 
     await expect(promise).rejects.toBeInstanceOf(GetStatementOperationError.UserNotFound)
+  })
+
+  it('should throw StatementNotFound if statement not exists', async () => {
+    statementRepository.findStatementOperation = jest.fn().mockResolvedValueOnce(undefined)
+
+    const promise = sut.execute({user_id: 'any_user_id', statement_id: 'invalid_statement_id'})
+
+    await expect(promise).rejects.toBeInstanceOf(GetStatementOperationError.StatementNotFound)
   })
 })
