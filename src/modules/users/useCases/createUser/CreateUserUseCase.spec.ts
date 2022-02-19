@@ -25,4 +25,11 @@ describe('CreateUserUseCase', () => {
 
     expect(user).toHaveProperty('id')
   })
+
+  it('should not be able to create a new user with email exists', async () => {
+    await sut.execute(mockCreateUserParams())
+    const promise = sut.execute(mockCreateUserParams())
+
+    await expect(promise).rejects.toBeInstanceOf(CreateUserError)
+  })
 });
