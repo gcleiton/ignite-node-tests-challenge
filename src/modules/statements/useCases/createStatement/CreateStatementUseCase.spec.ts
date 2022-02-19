@@ -60,4 +60,16 @@ describe('GetBalanceUseCase', () => {
       description: 'any_description'
     })
   })
+
+  it('should return correct data on withdraw success', async () => {
+    const statement = await sut.execute({user_id: 'any_user_id', type: OperationType.WITHDRAW, amount: 5, description: 'any_description'})
+
+    expect(statement).toBeDefined()
+    expect(statement).toMatchObject({
+      user_id: 'any_user_id',
+      type: OperationType.WITHDRAW,
+      amount: 5,
+      description: 'any_description'
+    })
+  })
 })
