@@ -3,6 +3,14 @@ import { IUsersRepository } from "../../repositories/IUsersRepository"
 import { ShowUserProfileError } from "./ShowUserProfileError"
 import { ShowUserProfileUseCase } from "./ShowUserProfileUseCase"
 
+const mockUser = () => {
+  return {
+    id: 'any_id',
+    name: 'any_name',
+    email: 'any_email'
+  }
+}
+
 describe('ShowUserProfileUseCase', () => {
   let userRepository: IUsersRepository
   let sut: ShowUserProfileUseCase
@@ -15,5 +23,13 @@ describe('ShowUserProfileUseCase', () => {
     const promise = sut.execute('invalid_id')
 
     await expect(promise).rejects.toBeInstanceOf(ShowUserProfileError)
+  })
+
+  it('should return correct data on success', async () => {
+    userRepository.findById = jest.fn().mockResolvedValueOnce(mockUser())
+
+    const user = await sut.execute('any_id')
+
+    expect(user).toEqual(mockUser())
   })
 })
