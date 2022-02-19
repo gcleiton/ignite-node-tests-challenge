@@ -38,14 +38,26 @@ describe('GetBalanceUseCase', () => {
   it('should throw UserNotFound if user not exists', async () => {
     userRepository.findById = jest.fn().mockResolvedValueOnce(undefined)
 
-    const promise = sut.execute({user_id: 'invalid_id', type: OperationType.DEPOSIT, amount: 10, description: 'any_description'})
+    const promise = sut.execute({user_id: 'invalid_user_id', type: OperationType.DEPOSIT, amount: 10, description: 'any_description'})
 
     await expect(promise).rejects.toBeInstanceOf(CreateStatementError.UserNotFound)
   })
 
   it('should throw InsufficientFunds if withdrawal amount is greater than the balance', async () => {
-    const promise = sut.execute({user_id: 'any_id', type: OperationType.WITHDRAW, amount: 10, description: 'any_description'})
+    const promise = sut.execute({user_id: 'any_user_id', type: OperationType.WITHDRAW, amount: 10, description: 'any_description'})
 
     await expect(promise).rejects.toBeInstanceOf(CreateStatementError.InsufficientFunds)
+  })
+
+  it('should return correct data on deposit success', async () => {
+    const statement = await sut.execute({user_id: 'any_user_id', type: OperationType.DEPOSIT, amount: 10, description: 'any_description'})
+
+    expect(statement).toBeDefined()
+    expect(statement).toMatchObject({
+      user_id: 'any_user_id',
+      type: OperationType.DEPOSIT,
+      amount: 10,
+      description: 'any_description'
+    })
   })
 })
