@@ -15,6 +15,13 @@ const makeFakeUser = () => {
   }
 }
 
+const makeFakeBalance = () => {
+  return {
+    balance: 5,
+    statement: []
+  }
+}
+
 describe('GetBalanceUseCase', () => {
   let statementRepository: IStatementsRepository
   let userRepository: IUsersRepository
@@ -22,6 +29,7 @@ describe('GetBalanceUseCase', () => {
 
   beforeEach(() => {
     statementRepository = new InMemoryStatementsRepository()
+    statementRepository.getUserBalance = jest.fn().mockResolvedValue(makeFakeBalance())
     userRepository = new InMemoryUsersRepository()
     userRepository.findById = jest.fn().mockResolvedValue(makeFakeUser())
     sut = new CreateStatementUseCase(userRepository, statementRepository)
@@ -35,4 +43,9 @@ describe('GetBalanceUseCase', () => {
     await expect(promise).rejects.toBeInstanceOf(CreateStatementError.UserNotFound)
   })
 
+  it('should throw InsufficientFunds if withdrawal amount is greater than the balance', async () => {
+    const promise = sut.execute({user_id: 'any_id', type: OperationType.WITHDRAW, amount: 10, description: 'any_description'})
+
+    await expect(promise).rejects.toBeInstanceOf(CreateStatementError.InsufficientFunds)
+  })
 })
