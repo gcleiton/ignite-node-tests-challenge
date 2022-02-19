@@ -3,11 +3,12 @@ import { IUsersRepository } from "../../repositories/IUsersRepository"
 import { ShowUserProfileError } from "./ShowUserProfileError"
 import { ShowUserProfileUseCase } from "./ShowUserProfileUseCase"
 
-const mockUser = () => {
+const mockFakeUser = () => {
   return {
     id: 'any_id',
     name: 'any_name',
-    email: 'any_email'
+    email: 'any_email',
+    password: 'any_password'
   }
 }
 
@@ -17,19 +18,20 @@ describe('ShowUserProfileUseCase', () => {
 
   beforeEach(() => {
     userRepository = new InMemoryUsersRepository()
+    userRepository.findById = jest.fn().mockResolvedValue(mockFakeUser())
     sut = new ShowUserProfileUseCase(userRepository)
   })
   it('should throw ShowUserProfileError if user not exists', async () => {
+    userRepository.findById = jest.fn().mockResolvedValueOnce(undefined)
+
     const promise = sut.execute('invalid_id')
 
     await expect(promise).rejects.toBeInstanceOf(ShowUserProfileError)
   })
 
   it('should return correct data on success', async () => {
-    userRepository.findById = jest.fn().mockResolvedValueOnce(mockUser())
-
     const user = await sut.execute('any_id')
 
-    expect(user).toEqual(mockUser())
+    expect(user).toEqual(mockFakeUser())
   })
 })
